@@ -1,15 +1,12 @@
 use rand::Rng;
 
-use crate::sort::insertion;
-
 fn main() {
     for _ in 0..1000 {
-        let mut input = rand_vec_gen(rand::random());
-        let input_clone = input.clone();
-        assert_eq!(insertion(input_clone), {
-            input.sort();
-            input
-        });
+        let mut input_1 = rand_vec_gen(rand::random());
+        let mut input_2 = input_1.clone();
+        sort::quicksort(&mut input_1);
+        input_2.sort();
+        assert_eq!(input_1, input_2);
     }
     println!("NO ERROR");
 }
@@ -75,7 +72,7 @@ mod sort {
     //////////////////////////////////////////////////
     /// Quicksort
     //////////////////////////////////////////////////
-    pub fn quick_by<T, F>(vec: &mut Vec<T>, compare: F)
+    pub fn quicksort_by<T, F>(vec: &mut Vec<T>, compare: F)
     where
         T: Copy,
         F: Fn(&T, &T) -> Ordering,
@@ -83,25 +80,25 @@ mod sort {
         if vec.len() == 0 {
             return;
         }
-        quick_by_(vec, &compare, 0, vec.len() - 1);
+        quicksort_by_(vec, &compare, 0, (vec.len() - 1) as isize);
     }
-    fn partition<T, F>(vec: &mut Vec<T>, compare: &F, start: usize, end: usize) -> usize
+    fn partition<T, F>(vec: &mut Vec<T>, compare: &F, start: isize, end: isize) -> isize
     where
         T: Copy,
         F: Fn(&T, &T) -> Ordering,
     {
-        let p = vec[end];
-        let mut i: isize = start as isize - 1;
+        let p = vec[end as usize];
+        let mut i: isize = start - 1;
         for j in start..end {
-            if let Ordering::Less | Ordering::Equal = compare(&vec[j], &p) {
+            if let Ordering::Less | Ordering::Equal = compare(&vec[j as usize], &p) {
                 i += 1;
-                vec.swap(i as usize, j);
+                vec.swap(i as usize, j as usize);
             };
         }
-        vec.swap((i + 1) as usize, end);
-        return (i + 1) as usize;
+        vec.swap((i + 1) as usize, end as usize);
+        return i + 1;
     }
-    fn quick_by_<T, F>(vec: &mut Vec<T>, compare: &F, start: usize, end: usize)
+    fn quicksort_by_<T, F>(vec: &mut Vec<T>, compare: &F, start: isize, end: isize)
     where
         T: Copy,
         F: Fn(&T, &T) -> Ordering,
@@ -110,16 +107,14 @@ mod sort {
             return;
         }
         let new_p = partition(vec, compare, start, end);
-        if new_p > 0 {
-            quick_by_(vec, compare, start, new_p - 1);
-        }
-        quick_by_(vec, compare, new_p + 1, end);
+        quicksort_by_(vec, compare, start, new_p - 1);
+        quicksort_by_(vec, compare, new_p + 1, end);
     }
-    pub fn quick<T>(vec: &mut Vec<T>)
+    pub fn quicksort<T>(vec: &mut Vec<T>)
     where
         T: Copy + PartialOrd,
     {
-        quick_by(vec, |a, b| a.partial_cmp(b).unwrap());
+        quicksort_by(vec, |a, b| a.partial_cmp(b).unwrap());
     }
 }
 
