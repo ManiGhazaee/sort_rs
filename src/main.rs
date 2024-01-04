@@ -4,16 +4,18 @@ use rand::Rng;
 
 fn main() {
     for _ in 0..1000 {
-        let input_1 = rand_vec_gen(rand::random());
+        let mut input_1 = rand_vec_gen(rand::random());
         let mut input_2 = input_1.clone();
+
         let inst = Instant::now();
-        let input_1 = sort::merge(input_1);
-        let el1 = inst.elapsed().as_micros();
+        sort::merge(&mut input_1);
+        let _1 = inst.elapsed().as_micros();
+
         let inst = Instant::now();
         input_2.sort();
-        let el2 = inst.elapsed().as_micros();
+        let _2 = inst.elapsed().as_micros();
+
         assert_eq!(input_1, input_2);
-        println!("me: {}\nrust: {}", el1, el2);
     }
     println!("NO ERROR");
 }
@@ -127,112 +129,55 @@ mod sort {
     //////////////////////////////////////////////////
     /// Merge
     //////////////////////////////////////////////////
-    pub fn merge_by<T, F>(vec: Vec<T>, compare: F) -> Vec<T>
+    pub fn merge_by<T, F>(input: &mut [T], compare: F)
     where
         T: Copy,
         F: Fn(&T, &T) -> Ordering,
     {
-        if vec.len() <= 1 {
-            return vec;
-        }
-        merge_by_(vec, &compare)
+        merge_by_(input, &compare);
     }
-    pub fn merge_by_<T, F>(mut vec: Vec<T>, compare: &F) -> Vec<T>
+    pub fn merge_by_<T, F>(input: &mut [T], compare: &F)
     where
         T: Copy,
         F: Fn(&T, &T) -> Ordering,
     {
-        let vec_len = vec.len();
-        if vec_len == 1 {
-            return vec;
-        } else if vec_len == 2 {
-            if let Ordering::Less = compare(&vec[1], &vec[0]) {
-                vec.swap(0, 1);
+        let input_len = input.len();
+        if input_len <= 1 {
+            return;
+        } else if input_len == 2 {
+            if let Ordering::Less = compare(&input[1], &input[0]) {
+                input.swap(0, 1);
             }
-            return vec;
         } else {
-            let mid = vec_len / 2;
-            let left = merge_by_(vec[0..mid].to_owned(), compare);
-            let right = merge_by_(vec[mid..].to_owned(), compare);
-            let mut res = Vec::with_capacity(vec_len);
+            let mid = input_len / 2;
+            merge_by_(&mut input[..mid], compare);
+            merge_by_(&mut input[mid..], compare);
+            let mut res = Vec::with_capacity(input_len);
             let mut il = 0;
-            let mut ir = 0;
-            while il < left.len() && ir < right.len() {
-                if let Ordering::Less = compare(&right[ir], &left[il]) {
-                    res.push(right[ir]);
+            let mut ir = mid;
+            while il < mid && ir < input_len {
+                if let Ordering::Less = compare(&input[ir], &input[il]) {
+                    res.push(input[ir]);
                     ir += 1;
                 } else {
-                    res.push(left[il]);
+                    res.push(input[il]);
                     il += 1;
                 }
             }
-            res.extend_from_slice(&left[il..]);
-            res.extend_from_slice(&right[ir..]);
-            return res;
+            if il < mid {
+                res.extend_from_slice(&input[il..mid]);
+            } else if ir < input_len {
+                res.extend_from_slice(&input[ir..input_len]);
+            }
+
+            input.copy_from_slice(&res[..]);
         }
     }
-    pub fn merge<T>(vec: Vec<T>) -> Vec<T>
+    pub fn merge<T>(vec: &mut [T])
     where
         T: Copy + PartialOrd,
     {
-        merge_by(vec, |a, b| a.partial_cmp(b).unwrap())
-    }
-    ///////////////////////
-    pub fn merge_sort<T: PartialOrd + Copy>(input: &mut [T]) {
-        if input.len() < 2 {
-            return;
-        }
-
-        let len = input.len();
-        let mid = len / 2;
-        merge_sort(&mut input[..mid]);
-        merge_sort(&mut input[mid..]);
-
-        let mut tmp = Vec::with_capacity(len);
-        let mut i = 0;
-        let mut j = mid;
-
-        while i < mid && j < len {
-            if input[i] < input[j] {
-                tmp.push(input[i]);
-                i += 1;
-            } else {
-                tmp.push(input[j]);
-                j += 1;
-            }
-        }
-        if i < mid {
-            tmp.extend_from_slice(&input[i..mid]);
-        } else if j < len {
-            tmp.extend_from_slice(&input[j..len]);
-        }
-
-        input.copy_from_slice(&tmp[..]);
-    }
-
-    fn merge_x<T: PartialOrd + Copy>(in1: &[T], in2: &[T], tmp: &mut [T]) {
-        let mut left = 0;
-        let mut right = 0;
-        let mut index = 0;
-
-        while left < in1.len() && right < in2.len() {
-            if in1[left] <= in2[right] {
-                tmp[index] = in1[left];
-                index += 1;
-                left += 1;
-            } else {
-                tmp[index] = in2[right];
-                index += 1;
-                right += 1;
-            }
-        }
-
-        if left < in1.len() {
-            tmp[index..].copy_from_slice(&in1[left..]);
-        }
-        if right < in2.len() {
-            tmp[index..].copy_from_slice(&in2[right..]);
-        }
+        merge_by(vec, |a, b| a.partial_cmp(b).unwrap());
     }
 }
 
