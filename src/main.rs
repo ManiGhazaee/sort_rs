@@ -89,7 +89,7 @@ mod sort {
         if vec.len() == 0 {
             return;
         }
-        quicksort_by_(vec, &compare, 0, (vec.len() - 1) as isize);
+        _quicksort_by(vec, &compare, 0, (vec.len() - 1) as isize);
     }
     fn partition<T, F>(vec: &mut Vec<T>, compare: &F, start: isize, end: isize) -> isize
     where
@@ -107,7 +107,7 @@ mod sort {
         vec.swap((i + 1) as usize, end as usize);
         return i + 1;
     }
-    fn quicksort_by_<T, F>(vec: &mut Vec<T>, compare: &F, start: isize, end: isize)
+    fn _quicksort_by<T, F>(vec: &mut Vec<T>, compare: &F, start: isize, end: isize)
     where
         T: Copy,
         F: Fn(&T, &T) -> Ordering,
@@ -116,8 +116,8 @@ mod sort {
             return;
         }
         let new_p = partition(vec, compare, start, end);
-        quicksort_by_(vec, compare, start, new_p - 1);
-        quicksort_by_(vec, compare, new_p + 1, end);
+        _quicksort_by(vec, compare, start, new_p - 1);
+        _quicksort_by(vec, compare, new_p + 1, end);
     }
     pub fn quicksort<T>(vec: &mut Vec<T>)
     where
@@ -134,9 +134,9 @@ mod sort {
         T: Copy,
         F: Fn(&T, &T) -> Ordering,
     {
-        merge_by_(input, &compare);
+        _merge_by(input, &compare);
     }
-    pub fn merge_by_<T, F>(input: &mut [T], compare: &F)
+    fn _merge_by<T, F>(input: &mut [T], compare: &F)
     where
         T: Copy,
         F: Fn(&T, &T) -> Ordering,
@@ -150,8 +150,8 @@ mod sort {
             }
         } else {
             let mid = input_len / 2;
-            merge_by_(&mut input[..mid], compare);
-            merge_by_(&mut input[mid..], compare);
+            _merge_by(&mut input[..mid], compare);
+            _merge_by(&mut input[mid..], compare);
             let mut res = Vec::with_capacity(input_len);
             let mut il = 0;
             let mut ir = mid;
