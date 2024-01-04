@@ -7,6 +7,7 @@ fn main() {
         let mut i3 = i1.clone();
         let mut i4 = i1.clone();
         let mut i5 = i1.clone();
+        let mut i6 = i1.clone();
 
         i1.sort();
 
@@ -14,11 +15,13 @@ fn main() {
         sort::quicksort(&mut i3);
         sort::insertion(&mut i4);
         sort::bubble(&mut i5);
+        sort::selection(&mut i6);
 
         assert_eq!(i1, i2);
         assert_eq!(i1, i3);
         assert_eq!(i1, i4);
         assert_eq!(i1, i5);
+        assert_eq!(i1, i6);
     }
     println!("NO ERROR");
 }

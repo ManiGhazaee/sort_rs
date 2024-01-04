@@ -155,6 +155,42 @@ where
     merge_by(vec, |a, b| a.partial_cmp(b).unwrap());
 }
 
+//////////////////////////////////////////////////
+/// Selection
+//////////////////////////////////////////////////
+pub fn selection_by<T, F>(input: &mut [T], compare: F)
+where
+    T: Copy,
+    F: Fn(&T, &T) -> Ordering,
+{
+    _selection_by(input, &compare);
+}
+fn _selection_by<T, F>(input: &mut [T], compare: &F)
+where
+    T: Copy,
+    F: Fn(&T, &T) -> Ordering,
+{
+    let len = input.len();
+    if len <= 1 {
+        return;
+    }
+    for i in 0..len - 1 {
+        let mut min = i;
+        for j in i + 1..len {
+            if let Ordering::Less = compare(&input[j], &input[min]) {
+                min = j;
+            }
+        }
+        input.swap(i, min);
+    }
+}
+pub fn selection<T>(vec: &mut [T])
+where
+    T: Copy + PartialOrd,
+{
+    selection_by(vec, |a, b| a.partial_cmp(b).unwrap());
+}
+
 pub fn rand_vec_gen(limit: u8) -> Vec<isize> {
     let mut rng = rand::thread_rng();
     (0..limit)
