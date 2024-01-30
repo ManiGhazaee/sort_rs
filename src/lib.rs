@@ -191,6 +191,63 @@ where
     selection_by(vec, |a, b| a.partial_cmp(b).unwrap());
 }
 
+//////////////////////////////////////////////////
+/// Heapsort
+//////////////////////////////////////////////////
+pub fn heapsort_by<T, F>(input: &mut [T], compare: F)
+where
+    T: Copy,
+    F: Fn(&T, &T) -> Ordering,
+{
+    _heapsort_by(input, &compare);
+}
+fn _heapsort_by<T, F>(input: &mut [T], compare: &F)
+where
+    T: Copy,
+    F: Fn(&T, &T) -> Ordering,
+{
+    let input_len = input.len();
+    if input_len <= 1 {
+        return;
+    }
+    for i in (0..input.len()).rev() {
+        _heapify_by(input, compare, i, input_len);
+    }
+    for i in (1..input.len()).rev() {
+        input.swap(i, 0);
+        _heapify_by(input, compare, 0, i);
+    }
+}
+fn _heapify_by<T, F>(input: &mut [T], compare: &F, root: usize, len: usize)
+where
+    T: Copy,
+    F: Fn(&T, &T) -> Ordering,
+{
+    let mut largest = root;
+    let left = root * 2 + 1;
+    let right = root * 2 + 2;
+    if left < len {
+        if let Ordering::Greater = compare(&input[left], &input[largest]) {
+            largest = left;
+        }
+    }
+    if right < len {
+        if let Ordering::Greater = compare(&input[right], &input[largest]) {
+            largest = right;
+        }
+    }
+    if largest != root {
+        input.swap(largest, root);
+        _heapify_by(input, compare, largest, len);
+    }
+}
+pub fn heapsort<T>(vec: &mut [T])
+where
+    T: Copy + PartialOrd,
+{
+    heapsort_by(vec, |a, b| a.partial_cmp(b).unwrap());
+}
+
 pub fn rand_vec_gen(limit: u8) -> Vec<isize> {
     let mut rng = rand::thread_rng();
     (0..limit)
