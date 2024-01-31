@@ -1,7 +1,10 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, collections::HashMap, fmt::Debug, time::Instant};
 
 use rand::Rng;
 
+////////////////////////////////////////////////////////////////////////////////
+/// Bubble 
+////////////////////////////////////////////////////////////////////////////////
 pub fn bubble<T>(input: &mut [T])
 where
     T: Copy + PartialOrd,
@@ -21,9 +24,9 @@ where
     }
 }
 
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 /// Insertion
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 pub fn insertion_by<T, F>(input: &mut [T], compare: F)
 where
     T: Copy,
@@ -53,10 +56,10 @@ where
     insertion_by(vec, |a, b| a.partial_cmp(b).unwrap());
 }
 
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 /// Quicksort
-//////////////////////////////////////////////////
-pub fn quicksort_by<T, F>(vec: &mut Vec<T>, compare: F)
+////////////////////////////////////////////////////////////////////////////////
+pub fn quicksort_by<T, F>(vec: &mut [T], compare: F)
 where
     T: Copy,
     F: Fn(&T, &T) -> Ordering,
@@ -66,7 +69,7 @@ where
     }
     _quicksort_by(vec, &compare, 0, (vec.len() - 1) as isize);
 }
-fn partition<T, F>(vec: &mut Vec<T>, compare: &F, start: isize, end: isize) -> isize
+fn partition<T, F>(vec: &mut [T], compare: &F, start: isize, end: isize) -> isize
 where
     T: Copy,
     F: Fn(&T, &T) -> Ordering,
@@ -82,7 +85,7 @@ where
     vec.swap((i + 1) as usize, end as usize);
     return i + 1;
 }
-fn _quicksort_by<T, F>(vec: &mut Vec<T>, compare: &F, start: isize, end: isize)
+fn _quicksort_by<T, F>(vec: &mut [T], compare: &F, start: isize, end: isize)
 where
     T: Copy,
     F: Fn(&T, &T) -> Ordering,
@@ -94,16 +97,16 @@ where
     _quicksort_by(vec, compare, start, new_p - 1);
     _quicksort_by(vec, compare, new_p + 1, end);
 }
-pub fn quicksort<T>(vec: &mut Vec<T>)
+pub fn quicksort<T>(vec: &mut [T])
 where
     T: Copy + PartialOrd,
 {
     quicksort_by(vec, |a, b| a.partial_cmp(b).unwrap());
 }
 
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 /// Merge
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 pub fn merge_by<T, F>(input: &mut [T], compare: F)
 where
     T: Copy,
@@ -155,9 +158,9 @@ where
     merge_by(vec, |a, b| a.partial_cmp(b).unwrap());
 }
 
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 /// Selection
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 pub fn selection_by<T, F>(input: &mut [T], compare: F)
 where
     T: Copy,
@@ -191,9 +194,9 @@ where
     selection_by(vec, |a, b| a.partial_cmp(b).unwrap());
 }
 
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 /// Heapsort
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 pub fn heapsort_by<T, F>(input: &mut [T], compare: F)
 where
     T: Copy,
@@ -248,10 +251,34 @@ where
     heapsort_by(vec, |a, b| a.partial_cmp(b).unwrap());
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// Utils
+////////////////////////////////////////////////////////////////////////////////
 pub fn rand_vec_gen(limit: u8) -> Vec<isize> {
     let mut rng = rand::thread_rng();
     (0..limit)
         .into_iter()
         .map(|_| rng.gen_range(-100..100))
         .collect()
+}
+
+pub fn sort_time<T>(
+    map: &mut HashMap<&str, [f64; 1000]>,
+    key: &str,
+    test: &Vec<T>,
+    sorted: &Vec<T>,
+    index: usize,
+    sort_func: fn(input: &mut [T]),
+) where
+    T: PartialEq + Debug + Clone,
+{
+    let mut test = test.clone();
+
+    let inst = Instant::now();
+    (sort_func)(&mut test);
+    let elpsd = inst.elapsed().as_secs_f64();
+    map.get_mut(key).unwrap()[index] = elpsd;
+
+    assert_eq!(&test, sorted);
 }
