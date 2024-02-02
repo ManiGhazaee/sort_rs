@@ -3,7 +3,7 @@ use std::{cmp::Ordering, collections::HashMap, fmt::Debug, time::Instant};
 use rand::Rng;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Bubble 
+/// Bubble
 ////////////////////////////////////////////////////////////////////////////////
 pub fn bubble<T>(input: &mut [T])
 where
@@ -251,20 +251,19 @@ where
     heapsort_by(vec, |a, b| a.partial_cmp(b).unwrap());
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 /// Utils
 ////////////////////////////////////////////////////////////////////////////////
-pub fn rand_vec_gen(limit: u8) -> Vec<isize> {
+pub fn rand_vec_gen(len: usize) -> Vec<isize> {
     let mut rng = rand::thread_rng();
-    (0..limit)
+    (0..len)
         .into_iter()
-        .map(|_| rng.gen_range(-100..100))
+        .map(|_| rng.gen_range(isize::MIN..isize::MAX))
         .collect()
 }
 
 pub fn sort_time<T>(
-    map: &mut HashMap<&str, [f64; 1000]>,
+    map: &mut HashMap<&str, [f64; 100]>,
     key: &str,
     test: &Vec<T>,
     sorted: &Vec<T>,
@@ -281,4 +280,15 @@ pub fn sort_time<T>(
     map.get_mut(key).unwrap()[index] = elpsd;
 
     assert_eq!(&test, sorted);
+}
+
+pub fn empty_test<T>(fns: &[fn(input: &mut [T])])
+where
+    T: PartialEq + Debug + Clone,
+{
+    for f in fns {
+        let mut i = [];
+        (f)(&mut i);
+        assert!(i.is_empty());
+    }
 }

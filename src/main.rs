@@ -1,11 +1,13 @@
 use std::{collections::HashMap, time::Instant};
 
-use sort::{rand_vec_gen, sort_time};
+use sort::{empty_test, rand_vec_gen, sort_time};
+
+const ITERATIONS: usize = 100;
+const VEC_LENS: [usize; 4] = [4, 16, 256, 2_048];
 
 fn main() {
-    const ITERATIONS: usize = 1000;
-    let t: [f64; 1000] = [0.0; ITERATIONS];
-    let mut map: HashMap<&str, [f64; 1000]> = HashMap::from([
+    let t = [0.0; ITERATIONS];
+    let mut map = HashMap::from([
         ("rust", t),
         ("merge", t),
         ("quicksort", t),
@@ -15,8 +17,18 @@ fn main() {
         ("heapsort", t),
     ]);
 
-    for i in 0..1000 {
-        let input = rand_vec_gen(rand::random());
+    empty_test::<isize>(&[
+        sort::merge,
+        sort::quicksort,
+        sort::insertion,
+        sort::bubble,
+        sort::selection,
+        sort::heapsort,
+    ]);
+
+    for i in 0..ITERATIONS {
+        let vec_len = VEC_LENS[i % VEC_LENS.len()];
+        let input = rand_vec_gen(vec_len);
         let mut sorted = input.clone();
 
         let inst = Instant::now();
